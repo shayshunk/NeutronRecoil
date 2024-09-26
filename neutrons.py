@@ -46,7 +46,7 @@ def main():
     random_engine = TRandom3() 
 
     neutron_energies     = [1.0] #[1.0, 3.0, 5.0]                  # neutron beam kinetic energy [MeV]
-    n_neutrons_detected  = [10]#[10,15,20,50,100] 
+    n_neutrons_detected  = [10] #[10,15,20,50,100] 
     gas                  = ["Propane"]
 
     h_angle_residual   = TH1F ("neutron_angle_residual", "neutron angle residual (degrees)",     100, -10, 10)
@@ -62,7 +62,7 @@ def main():
     h_theta_vs_phi_weighted = TH2D ("proton_theta_vs_phi_weighted",";#Theta (degrees);#Phi (degrees);energy per bin (MeV)",  25, 0 , 180., 25, -180., 180. )
 
     for kinetic_energy in neutron_energies:
-        E_n  = neutron_mass+kinetic_energy
+        E_n  = neutron_mass + kinetic_energy
         p_n  = sqrt (E_n**2 - neutron_mass**2)
 
         # incoming neutron beam is in x-direction
