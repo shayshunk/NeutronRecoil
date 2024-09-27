@@ -51,7 +51,7 @@ def main():
     neutron_energies = [
         1.0
     ]  # [1.0, 3.0, 5.0]                  # neutron beam kinetic energy [MeV]
-    n_neutrons_detected = [10]  # [10,15,20,50,100]
+    n_neutrons_detected = [100]  # [10,15,20,50,100]
     gas = ["Propane"]
 
     h_angle_residual = TH1F(
