@@ -55,7 +55,7 @@ plt.xlabel("True Phi (radians)")
 plt.xlim(-1.8, 1.8)
 plt.ylabel("Predicted Phi (radians)")
 plt.ylim(-1.8, 1.8)
-plt.savefig("Phi.pdf")
+plt.savefig("Phi.pdf", bbox_inches='tight')
 
 plt.figure(2)
 
@@ -68,7 +68,7 @@ plt.xlabel("True Theta (radians)")
 plt.xlim(0, 3.2)
 plt.ylabel("Predicted Theta (radians)")
 plt.ylim(0, 3.2)
-plt.savefig("Theta.pdf")
+plt.savefig("Theta.pdf", bbox_inches='tight')
 
 plt.figure(3)
 
@@ -81,6 +81,6 @@ plt.xlabel("True Energy (MeV)")
 plt.xlim(-0.2, 1.2)
 plt.ylabel("Predicted Energy (MeV)")
 plt.ylim(-0.2, 1.2)
-plt.savefig("Energy.pdf")
+plt.savefig("Energy.pdf", bbox_inches='tight')
 
 plt.show()
