@@ -30,7 +30,7 @@ RecoilModel.compile(
 )
 
 # Training model
-RecoilModel.fit(trainingSmears, trainingRecoils, epochs=5)
+RecoilModel.fit(trainingSmears, trainingRecoils, epochs=8)
 
 # Testing model
 valLoss, valAcc = RecoilModel.evaluate(testingSmears, testingRecoils)
@@ -47,11 +47,40 @@ modelPrediction = RecoilModel.predict(plottingSmears)
 # Plotting
 xrange = np.linspace(-1.6, 1.6, 200)
 
+plt.figure(1)
 plt.plot(plottingRecoils["Phi"], modelPrediction[:,0], linestyle='None', marker='o')
 plt.plot(xrange, xrange)
 plt.title("Predicted Phi Recoil vs True Phi")
-plt.xlabel("True Phi")
+plt.xlabel("True Phi (radians)")
 plt.xlim(-1.8, 1.8)
-plt.ylabel("Predicted Phi")
+plt.ylabel("Predicted Phi (radians)")
 plt.ylim(-1.8, 1.8)
+plt.savefig("Phi.pdf")
+
+plt.figure(2)
+
+xrange = np.linspace(0.2, 3, 200)
+
+plt.plot(plottingRecoils["Theta"], modelPrediction[:,1], linestyle='None', marker='o')
+plt.plot(xrange, xrange)
+plt.title("Predicted Theta Recoil vs True Theta")
+plt.xlabel("True Theta (radians)")
+plt.xlim(0, 3.2)
+plt.ylabel("Predicted Theta (radians)")
+plt.ylim(0, 3.2)
+plt.savefig("Theta.pdf")
+
+plt.figure(3)
+
+xrange = np.linspace(0, 1, 200)
+
+plt.plot(plottingRecoils["Energy"], modelPrediction[:,2], linestyle='None', marker='o')
+plt.plot(xrange, xrange)
+plt.title("Predicted Energy Recoil vs True Energy")
+plt.xlabel("True Energy (MeV)")
+plt.xlim(-0.2, 1.2)
+plt.ylabel("Predicted Energy (MeV)")
+plt.ylim(-0.2, 1.2)
+plt.savefig("Energy.pdf")
+
 plt.show()

@@ -135,14 +135,14 @@ def main():
                 )
 
                 for proton in true_protons:
-                    protonEnergyTruth.append(proton.E())
+                    protonEnergyTruth.append(proton.E() - proton.M())
                     protonThetaTruth.append(proton.Theta())
                     protonPhiTruth.append(proton.Phi())
 
                 reco_protons = proton_detection(random_engine, true_protons)
 
                 for proton in reco_protons:
-                    protonEnergySmear.append(proton.E())
+                    protonEnergySmear.append(proton.E() - proton.M())
                     protonThetaSmear.append(proton.Theta())
                     protonPhiSmear.append(proton.Phi())
                 
