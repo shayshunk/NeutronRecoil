@@ -2,6 +2,9 @@ import pandas as pd
 import tensorflow as tf
 import matplotlib.pyplot as plt
 import numpy as np
+from decimal import Decimal
+
+plt.rcParams.update({'font.size': 16})
 
 # Naming columns since CSVs have no header
 columns = ["Phi", "Theta", "Energy"]
@@ -44,12 +47,21 @@ plottingSmears = realData.iloc[-200:, :]
 # Predicting Phi
 modelPrediction = RecoilModel.predict(plottingSmears)
 
+phiDiff = plottingRecoils["Phi"] - modelPrediction[:, 0]
+thetaDiff = plottingRecoils["Theta"] - modelPrediction[:, 1]
+energyDiff = plottingRecoils["Energy"] - modelPrediction[:, 2]
+
+phiDiff = sum(phiDiff)/len(phiDiff)
+thetaDiff = sum(thetaDiff)/len(thetaDiff)
+energyDiff = sum(energyDiff)/len(energyDiff)
+
 # Plotting
 xrange = np.linspace(-1.6, 1.6, 200)
 
 plt.figure(1)
 plt.plot(plottingRecoils["Phi"], modelPrediction[:,0], linestyle='None', marker='o')
 plt.plot(xrange, xrange)
+plt.text(-1.5, 1, "Average difference: %.3f"%(Decimal(phiDiff)), bbox = dict(facecolor = 'red', alpha = 0.5))
 plt.title("Predicted Phi Recoil vs True Phi")
 plt.xlabel("True Phi (radians)")
 plt.xlim(-1.8, 1.8)
@@ -63,6 +75,7 @@ xrange = np.linspace(0.2, 3, 200)
 
 plt.plot(plottingRecoils["Theta"], modelPrediction[:,1], linestyle='None', marker='o')
 plt.plot(xrange, xrange)
+plt.text(0.1, 2.8, "Average difference: %.3f"%(Decimal(thetaDiff)), bbox = dict(facecolor = 'red', alpha = 0.5))
 plt.title("Predicted Theta Recoil vs True Theta")
 plt.xlabel("True Theta (radians)")
 plt.xlim(0, 3.2)
@@ -77,6 +90,7 @@ xrange = np.linspace(0, 1, 200)
 plt.plot(plottingRecoils["Energy"], modelPrediction[:,2], linestyle='None', marker='o')
 plt.plot(xrange, xrange)
 plt.title("Predicted Energy Recoil vs True Energy")
+plt.text(0, 1, "Average difference: %.3f"%(Decimal(energyDiff)), bbox = dict(facecolor = 'red', alpha = 0.5))
 plt.xlabel("True Energy (MeV)")
 plt.xlim(-0.2, 1.2)
 plt.ylabel("Predicted Energy (MeV)")
@@ -84,3 +98,5 @@ plt.ylim(-0.2, 1.2)
 plt.savefig("Energy.pdf", bbox_inches='tight')
 
 plt.show()
+
+print(Decimal(phiDiff))
