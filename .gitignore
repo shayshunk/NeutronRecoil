@@ -1,3 +1,6 @@
 # Don't include testing files
 testing.py
 testNN.py
+
+# Don't include data
+*.csv

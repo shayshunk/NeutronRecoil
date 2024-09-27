@@ -5,6 +5,7 @@ import math
 from ROOT import TLorentzVector, TVector3, TGraphErrors
 from array import array
 from math import sqrt
+import numpy as np
 
 # to do
 
@@ -51,7 +52,7 @@ def main():
     neutron_energies = [
         1.0
     ]  # [1.0, 3.0, 5.0]                  # neutron beam kinetic energy [MeV]
-    n_neutrons_detected = [100]  # [10,15,20,50,100]
+    n_neutrons_detected = [1000]  # [10,15,20,50,100]
     gas = ["Propane"]
 
     h_angle_residual = TH1F(
@@ -100,6 +101,15 @@ def main():
         180.0,
     )
 
+    # Lists for CSVs for training
+    protonPhiTruth = []
+    protonThetaTruth = []
+    protonEnergyTruth = []
+    protonPhiSmear = []
+    protonThetaSmear = []
+    protonEnergySmear = []
+
+
     for kinetic_energy in neutron_energies:
         E_n = neutron_mass + kinetic_energy
         p_n = sqrt(E_n**2 - neutron_mass**2)
@@ -123,7 +133,19 @@ def main():
                 true_protons = proton_scattering(
                     random_engine, n_neutrons, incoming_neutron, gas
                 )
+
+                for proton in true_protons:
+                    protonEnergyTruth.append(proton.E())
+                    protonThetaTruth.append(proton.Theta())
+                    protonPhiTruth.append(proton.Phi())
+
                 reco_protons = proton_detection(random_engine, true_protons)
+
+                for proton in reco_protons:
+                    protonEnergySmear.append(proton.E())
+                    protonThetaSmear.append(proton.Theta())
+                    protonPhiSmear.append(proton.Phi())
+                
                 energy, angle = find_beam_direction(reco_protons, kinetic_energy, debug)
                 h_angle_residual.Fill((angle - 0.0))
                 h_energy_residual.Fill((energy - kinetic_energy) / kinetic_energy)
@@ -185,6 +207,8 @@ def main():
         # energy = fit.GetParameter(0);
         # angle  = fit.GetParameter(1);
 
+    np.savetxt("TruthData.csv", [p for p in zip(protonPhiTruth, protonThetaTruth, protonEnergyTruth)], delimiter=',', newline='\n')
+    np.savetxt("SmearData.csv", [p for p in zip(protonPhiSmear, protonThetaSmear, protonEnergySmear)], delimiter=',', newline='\n')
     print("Done!")
 
 
