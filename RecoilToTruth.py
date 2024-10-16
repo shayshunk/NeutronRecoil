@@ -7,25 +7,31 @@ from decimal import Decimal
 plt.rcParams.update({'font.size': 16})
 
 # Naming columns since CSVs have no header
-columns = ["Phi", "Theta", "Energy"]
+columns = ["Phi", "Theta", "Proton Energy", "Neutron Energy"]
 
 # Reading in truth and reconstructed data
-truthData = pd.read_csv("TruthData.csv", header=None, names=columns)
-realData = pd.read_csv("SmearData.csv", header=None, names=columns)
+recoilData = pd.read_csv("OutputData.csv", header=None, names=columns)
+
+# Scrambling database
+recoilData = recoilData.sample(frac=1).reset_index(drop=True)
 
 # Splitting data into training and testing labels, saving 25% for testing
-trainingRecoils = truthData.iloc[:750000, :]
-testingRecoils = truthData.iloc[750000:, :]
+trainingData = recoilData.iloc[:800000, :]
+testingData = recoilData.iloc[800000:, :]
 
-trainingSmears = realData.iloc[:750000, :]
-testingSmears = realData.iloc[750000:, :]
+# Extracting proton data vs neutron data
+neutronTraining = trainingData["Neutron Energy"]
+protonTraining = trainingData[["Phi", "Theta", "Proton Energy"]]
+
+neutronTesting = testingData["Neutron Energy"]
+protonTesting = testingData[["Phi", "Theta", "Proton Energy"]]
 
 # Defining model
 RecoilModel = tf.keras.models.Sequential()
 RecoilModel.add(tf.keras.layers.Dense(128, input_shape=(3,), activation="relu"))
 RecoilModel.add(tf.keras.layers.Dense(128, activation="relu"))
 RecoilModel.add(tf.keras.layers.Dense(128, activation="relu"))
-RecoilModel.add(tf.keras.layers.Dense(3))
+RecoilModel.add(tf.keras.layers.Dense(1))
 
 # Compiling model
 RecoilModel.compile(
@@ -33,76 +39,30 @@ RecoilModel.compile(
 )
 
 # Training model
-RecoilModel.fit(trainingSmears, trainingRecoils, epochs=3)
+RecoilModel.fit(protonTraining, neutronTraining, epochs=5)
 
 # Testing model
-valLoss, valAcc = RecoilModel.evaluate(testingSmears, testingRecoils)
+valLoss, valAcc = RecoilModel.evaluate(protonTesting, neutronTesting)
 print("Test accuracy: ", valAcc)
 print("Test loss: ", valLoss)
 
 # Grabbing last 200 data points for plotting
-plottingRecoils = truthData.iloc[-200:, :]
-plottingSmears = realData.iloc[-200:, :]
+plottingProtons = protonTesting.iloc[-200:, :]
+plottingNeutrons = neutronTesting.iloc[-200:]
 
 # Predicting Phi
-modelPrediction = RecoilModel.predict(plottingSmears)
-
-phiDiff = plottingRecoils["Phi"] - modelPrediction[:, 0]
-thetaDiff = plottingRecoils["Theta"] - modelPrediction[:, 1]
-energyDiff = plottingRecoils["Energy"] - modelPrediction[:, 2]
-
-phiDiff = sum(phiDiff)/len(phiDiff)
-thetaDiff = sum(thetaDiff)/len(thetaDiff)
-energyDiff = sum(energyDiff)/len(energyDiff)
-
-phiOriginalDiff = plottingSmears["Phi"] - plottingRecoils["Phi"]
-phiOriginalDiff = sum(phiOriginalDiff)/len(phiOriginalDiff)
-print(phiOriginalDiff)
+modelPrediction = RecoilModel.predict(plottingProtons)
 
 # Plotting
-xrange = np.linspace(-1.6, 1.6, 200)
+xrange = np.linspace(0, 2.0, 200)
 
 plt.figure(1)
-plt.plot(plottingRecoils["Phi"], modelPrediction[:,0], linestyle='None', marker='o', label="Unsmeared")
-plt.plot(plottingSmears["Phi"], modelPrediction[:,0], linestyle='None', marker='o', label="Original")
+plt.plot(plottingNeutrons, modelPrediction, linestyle='None', marker='o', label="Unsmeared")
 plt.plot(xrange, xrange)
-plt.text(-1.5, 1, "Average difference: %.3f"%(Decimal(phiDiff)), bbox = dict(facecolor = 'red', alpha = 0.5))
-plt.title("Predicted Phi Recoil vs True Phi")
-plt.xlabel("True Phi (radians)")
-plt.xlim(-1.8, 1.8)
-plt.ylabel("Predicted Phi (radians)")
-plt.ylim(-1.8, 1.8)
-plt.savefig("Phi.pdf", bbox_inches='tight')
+plt.title("Predicted Neutron Energy vs True Neutron Energy")
+plt.xlabel("True Energy (keV)")
+plt.xlim(0, 2.1)
+plt.ylabel("Predicted Energy (keV)")
+plt.ylim(0, 2.1)
+plt.savefig("True Energy.pdf", bbox_inches='tight')
 plt.legend()
-
-plt.figure(2)
-
-xrange = np.linspace(0.2, 3, 200)
-
-plt.plot(plottingRecoils["Theta"], modelPrediction[:,1], linestyle='None', marker='o')
-plt.plot(xrange, xrange)
-plt.text(0.1, 2.8, "Average difference: %.3f"%(Decimal(thetaDiff)), bbox = dict(facecolor = 'red', alpha = 0.5))
-plt.title("Predicted Theta Recoil vs True Theta")
-plt.xlabel("True Theta (radians)")
-plt.xlim(0, 3.2)
-plt.ylabel("Predicted Theta (radians)")
-plt.ylim(0, 3.2)
-plt.savefig("Theta.pdf", bbox_inches='tight')
-
-plt.figure(3)
-
-xrange = np.linspace(0, 1, 200)
-
-plt.plot(plottingRecoils["Energy"], modelPrediction[:,2], linestyle='None', marker='o')
-plt.plot(xrange, xrange)
-plt.title("Predicted Energy Recoil vs True Energy")
-plt.text(0, 1, "Average difference: %.3f"%(Decimal(energyDiff)), bbox = dict(facecolor = 'red', alpha = 0.5))
-plt.xlabel("True Energy (MeV)")
-plt.xlim(-0.2, 1.2)
-plt.ylabel("Predicted Energy (MeV)")
-plt.ylim(-0.2, 1.2)
-plt.savefig("Energy.pdf", bbox_inches='tight')
-
-plt.show()
-
-print(Decimal(phiDiff))

@@ -6,6 +6,7 @@ from ROOT import TLorentzVector, TVector3, TGraphErrors
 from array import array
 from math import sqrt
 import numpy as np
+import pandas as pd
 
 # to do
 
@@ -45,14 +46,12 @@ def Style():
 def main():
 
     # Style()
-    iterations = 1000  # number of measurements used to estimate resolution
+    iterations = 50000  # number of measurements used to estimate resolution
     c1 = TCanvas("Results")
     random_engine = TRandom3()
 
-    neutron_energies = [
-        1.0
-    ]  # [1.0, 3.0, 5.0]                  # neutron beam kinetic energy [MeV]
-    n_neutrons_detected = [1000]  # [10,15,20,50,100]
+    neutron_energies = [1.0, 2.0]  # [1.0, 3.0, 5.0] neutron beam kinetic energy [MeV]
+    n_neutrons_detected = [10]  # [10,15,20,50,100]
     gas = ["Propane"]
 
     h_angle_residual = TH1F(
@@ -102,13 +101,7 @@ def main():
     )
 
     # Lists for CSVs for training
-    protonPhiTruth = []
-    protonThetaTruth = []
-    protonEnergyTruth = []
-    protonPhiSmear = []
-    protonThetaSmear = []
-    protonEnergySmear = []
-
+    recoilList = []
 
     for kinetic_energy in neutron_energies:
         E_n = neutron_mass + kinetic_energy
@@ -134,18 +127,18 @@ def main():
                     random_engine, n_neutrons, incoming_neutron, gas
                 )
 
-                for proton in true_protons:
-                    protonEnergyTruth.append(proton.E() - proton.M())
-                    protonThetaTruth.append(proton.Theta())
-                    protonPhiTruth.append(proton.Phi())
-
                 reco_protons = proton_detection(random_engine, true_protons)
 
+                recoilSet = []
+
                 for proton in reco_protons:
-                    protonEnergySmear.append(proton.E() - proton.M())
-                    protonThetaSmear.append(proton.Theta())
-                    protonPhiSmear.append(proton.Phi())
-                
+                    recoilSet.append(proton.E() - proton.M())
+                    recoilSet.append(proton.Theta())
+                    recoilSet.append(proton.Phi())
+
+                recoilSet.append(kinetic_energy)
+                recoilList.append(recoilSet)
+
                 energy, angle = find_beam_direction(reco_protons, kinetic_energy, debug)
                 h_angle_residual.Fill((angle - 0.0))
                 h_energy_residual.Fill((energy - kinetic_energy) / kinetic_energy)
@@ -207,9 +200,17 @@ def main():
         # energy = fit.GetParameter(0);
         # angle  = fit.GetParameter(1);
 
-    np.savetxt("TruthData.csv", [p for p in zip(protonPhiTruth, protonThetaTruth, protonEnergyTruth)], delimiter=',', newline='\n')
-    np.savetxt("SmearData.csv", [p for p in zip(protonPhiSmear, protonThetaSmear, protonEnergySmear)], delimiter=',', newline='\n')
+    recoilArray = np.array(recoilList)
+    recoilArrayReshaped = recoilArray.reshape(recoilArray.shape[0], -1)
+
+    np.savetxt(
+        "OutputData.csv",
+        recoilArrayReshaped,
+        delimiter=",",
+        newline="\n",
+    )
     print("Done!")
+    print("Recoil list shape:", recoilArray.shape)
 
 
 def find_beam_direction(protons, neutron_energy, debug=False):
