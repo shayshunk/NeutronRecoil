@@ -46,12 +46,12 @@ def Style():
 def main():
 
     # Style()
-    iterations = 50000  # number of measurements used to estimate resolution
+    iterations = 100000  # number of measurements used to estimate resolution
     c1 = TCanvas("Results")
     random_engine = TRandom3()
 
-    neutron_energies = [1.0, 2.0]  # [1.0, 3.0, 5.0] neutron beam kinetic energy [MeV]
-    n_neutrons_detected = [10]  # [10,15,20,50,100]
+    neutron_energies = [1.0, 3.0, 5.0]  # [1.0, 3.0, 5.0] neutron beam kinetic energy [MeV]
+    n_neutrons_detected = [20]  # [10,15,20,50,100]
     gas = ["Propane"]
 
     h_angle_residual = TH1F(
@@ -132,11 +132,11 @@ def main():
                 recoilSet = []
 
                 for proton in reco_protons:
-                    recoilSet.append(proton.E() - proton.M())
-                    recoilSet.append(proton.Theta())
-                    recoilSet.append(proton.Phi())
+                    recoilSet.append((proton.E() - proton.M()) / 5.2)
+                    recoilSet.append(proton.Theta() / 3.2)
+                    recoilSet.append((proton.Phi() + 3) / 6.3)
 
-                recoilSet.append(kinetic_energy)
+                recoilSet.append(kinetic_energy / 5)
                 recoilList.append(recoilSet)
 
                 energy, angle = find_beam_direction(reco_protons, kinetic_energy, debug)
