@@ -33,7 +33,7 @@ RecoilModel.compile(
 )
 
 # Training model
-RecoilModel.fit(trainingSmears, trainingRecoils, epochs=8)
+RecoilModel.fit(trainingSmears, trainingRecoils, epochs=3)
 
 # Testing model
 valLoss, valAcc = RecoilModel.evaluate(testingSmears, testingRecoils)
@@ -55,11 +55,16 @@ phiDiff = sum(phiDiff)/len(phiDiff)
 thetaDiff = sum(thetaDiff)/len(thetaDiff)
 energyDiff = sum(energyDiff)/len(energyDiff)
 
+phiOriginalDiff = plottingSmears["Phi"] - plottingRecoils["Phi"]
+phiOriginalDiff = sum(phiOriginalDiff)/len(phiOriginalDiff)
+print(phiOriginalDiff)
+
 # Plotting
 xrange = np.linspace(-1.6, 1.6, 200)
 
 plt.figure(1)
-plt.plot(plottingRecoils["Phi"], modelPrediction[:,0], linestyle='None', marker='o')
+plt.plot(plottingRecoils["Phi"], modelPrediction[:,0], linestyle='None', marker='o', label="Unsmeared")
+plt.plot(plottingSmears["Phi"], modelPrediction[:,0], linestyle='None', marker='o', label="Original")
 plt.plot(xrange, xrange)
 plt.text(-1.5, 1, "Average difference: %.3f"%(Decimal(phiDiff)), bbox = dict(facecolor = 'red', alpha = 0.5))
 plt.title("Predicted Phi Recoil vs True Phi")
@@ -68,6 +73,7 @@ plt.xlim(-1.8, 1.8)
 plt.ylabel("Predicted Phi (radians)")
 plt.ylim(-1.8, 1.8)
 plt.savefig("Phi.pdf", bbox_inches='tight')
+plt.legend()
 
 plt.figure(2)
 
