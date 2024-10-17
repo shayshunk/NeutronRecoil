@@ -12,12 +12,12 @@ recoilData = pd.read_csv("OutputData.csv", header=None)
 # Scrambling database
 recoilData = recoilData.sample(frac=1).reset_index(drop=True)
 
-print("Reading in data")
+""" print("Reading in data")
 print(recoilData.head())
 print("Max and min of each column")
 print(recoilData.max(axis=0))
 print(recoilData.min(axis=0))
-
+ """
 # Splitting data into training and testing labels, saving 25% for testing
 trainingData = recoilData.iloc[:2400000, :]
 testingData = recoilData.iloc[2400000:, :]
@@ -50,6 +50,9 @@ RecoilModel.compile(
 # Training model
 RecoilModel.fit(protonTraining, neutronTraining, validation_data=(protonTesting, neutronTesting), epochs=10)
 
+# Saving model
+RecoilModel.save("NeutronEnergyPrediction.keras")
+
 # Grabbing last 200 data points for plotting
 plottingProtons = protonTesting.iloc[-1000:, :]
 plottingNeutrons = neutronTesting.iloc[-1000:] 
@@ -64,11 +67,13 @@ modelPrediction = (modelPrediction.ravel()) * 5
 plottingNeutrons = plottingNeutrons * 5
 
 predictionData = pd.DataFrame({"Predicted":modelPrediction, "True":plottingNeutrons})
+predictionData["Error"] = ((predictionData["True"] - predictionData["Predicted"]) / predictionData["True"]) * 100
+predictionData["Error"] = predictionData["Error"].abs()
 
-print(predictionData.head(20))
+print(predictionData[predictionData["Error"] >= 20])
 
-print(plottingProtons.iloc[9])
-print(plottingNeutrons.iloc[9])
+""" print(plottingProtons.iloc[9])
+print(plottingNeutrons.iloc[9]) """
 
 # Plotting
 plt.figure(1)
