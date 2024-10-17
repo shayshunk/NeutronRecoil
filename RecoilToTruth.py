@@ -6,8 +6,6 @@ from decimal import Decimal
 from tensorflow.keras.callbacks import TensorBoard
 import time
 
-tensorboard = TensorBoard(log_dir='logs/test')
-
 plt.rcParams.update({'font.size': 16})
 
 # Reading in truth and reconstructed data
@@ -30,61 +28,69 @@ testingData = recoilData.iloc[2400000:, :]
 neutronTraining = trainingData.iloc[:, 60]
 protonTraining = trainingData.drop(60, axis=1)
 
-print(protonTraining.head(10))
-print(neutronTraining.head(10))
-print(recoilData.head(10))
-
 neutronTesting = testingData.iloc[:, 60]
 protonTesting = testingData.drop(60, axis=1)
 
-# Defining model
-RecoilModel = tf.keras.models.Sequential()
-RecoilModel.add(tf.keras.layers.Dense(256, input_shape=(60,), activation="relu"))
-RecoilModel.add(tf.keras.layers.Dense(512, activation="relu"))
-RecoilModel.add(tf.keras.layers.Dense(512, activation="relu"))
-RecoilModel.add(tf.keras.layers.Dense(512, activation="relu"))
-RecoilModel.add(tf.keras.layers.Dense(256, activation="relu"))
-RecoilModel.add(tf.keras.layers.Dense(1,))
-
-# Compiling model
-RecoilModel.compile(
-    optimizer="adam", loss="mean_squared_error", metrics=["mean_absolute_error", "mean_squared_error"]
-)
-
-# Training model
-RecoilModel.fit(protonTraining, neutronTraining, validation_data=(protonTesting, neutronTesting), epochs=10, callbacks=[tensorboard])
-
-# Saving model
-RecoilModel.save("NeutronEnergyPrediction.keras")
-
-# Grabbing last 200 data points for plotting
+# Grabbing last 1000 data points for plotting
 plottingProtons = protonTesting.iloc[-1000:, :]
 plottingNeutrons = neutronTesting.iloc[-1000:] 
 
 plottingProtons.reset_index(drop=True, inplace=True)
 plottingNeutrons.reset_index(drop=True, inplace=True)
 
-# Predicting Phi
-modelPrediction = RecoilModel.predict(plottingProtons)
+# Defining model
+denseLayers = [2, 3, 4, 5]
+layerSizes = [64, 128, 256, 512]
+batchSizes = [32, 64, 128]
 
-modelPrediction = (modelPrediction.ravel()) * 5
-plottingNeutrons = plottingNeutrons * 5
+for denseLayer in denseLayers:
+    for layerSize in layerSizes:
+        for batchSize in batchSizes:
+            NAME = "{}-dense-{}-nodes-{}-batch-{}".format(denseLayer, layerSize, batchSize, int(time.time()))
+            print("Model:")
+            print(NAME)
+            tensorboard = TensorBoard(log_dir='logs/{}'.format(NAME))
 
-predictionData = pd.DataFrame({"Predicted":modelPrediction, "True":plottingNeutrons})
-predictionData["Error"] = ((predictionData["True"] - predictionData["Predicted"]) / predictionData["True"]) * 100
-predictionData["Error"] = predictionData["Error"].abs()
+            RecoilModel = tf.keras.models.Sequential()
+            RecoilModel.add(tf.keras.layers.Dense(layerSize, input_shape=(60,), activation="relu"))
 
-print(predictionData[predictionData["Error"] >= 20])
+            for i in range(denseLayer - 1):
+                RecoilModel.add(tf.keras.layers.Dense(layerSize, activation="relu"))
 
-""" print(plottingProtons.iloc[9])
-print(plottingNeutrons.iloc[9]) """
+            RecoilModel.add(tf.keras.layers.Dense(1,))
 
-# Plotting
-plt.figure(1)
-plt.plot(predictionData["True"], predictionData["Predicted"], linestyle='None', marker='.', markersize=4)
-plt.title("Predicted Neutron Energy vs True Neutron Energy")
-plt.xlabel("True Energy (MeV)")
-plt.xlim(0, 5.5)
-plt.ylabel("Predicted Energy (MeV)")
-plt.ylim(0, 5.5)
-plt.savefig("True Energy.pdf", bbox_inches='tight')
+            # Compiling model
+            RecoilModel.compile(
+                optimizer="adam", loss="mean_squared_error", metrics=["mean_absolute_error", "mean_squared_error"]
+            )
+
+            # Training model
+            RecoilModel.fit(protonTraining, neutronTraining, batch_size=batchSize, validation_data=(protonTesting, neutronTesting), epochs=10, callbacks=[tensorboard])
+
+            # Saving model
+            RecoilModel.save("NeutronEnergyPrediction.keras")
+
+            # Predicting Phi
+            modelPrediction = RecoilModel.predict(plottingProtons)
+
+            modelPrediction = (modelPrediction.ravel()) * 5
+            plottingNeutrons = plottingNeutrons * 5
+
+            predictionData = pd.DataFrame({"Predicted":modelPrediction, "True":plottingNeutrons})
+            predictionData["Error"] = ((predictionData["True"] - predictionData["Predicted"]) / predictionData["True"]) * 100
+            predictionData["Error"] = predictionData["Error"].abs()
+
+            print(predictionData[predictionData["Error"] >= 20])
+
+            """ print(plottingProtons.iloc[9])
+            print(plottingNeutrons.iloc[9]) """
+
+            # Plotting
+            plt.figure(1)
+            plt.plot(predictionData["True"], predictionData["Predicted"], linestyle='None', marker='.', markersize=4)
+            plt.title("Predicted Neutron Energy vs True Neutron Energy")
+            plt.xlabel("True Energy (MeV)")
+            plt.xlim(0, 5.5)
+            plt.ylabel("Predicted Energy (MeV)")
+            plt.ylim(0, 5.5)
+            plt.savefig("True Energy_{}.pdf".format(NAME), bbox_inches='tight')
