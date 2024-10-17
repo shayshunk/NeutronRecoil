@@ -37,6 +37,7 @@ plottingNeutrons = neutronTesting.iloc[-1000:]
 
 plottingProtons.reset_index(drop=True, inplace=True)
 plottingNeutrons.reset_index(drop=True, inplace=True)
+plottingNeutrons = plottingNeutrons * 5
 
 # Defining model
 denseLayers = [2, 3, 4, 5]
@@ -74,7 +75,6 @@ for denseLayer in denseLayers:
             modelPrediction = RecoilModel.predict(plottingProtons)
 
             modelPrediction = (modelPrediction.ravel()) * 5
-            plottingNeutrons = plottingNeutrons * 5
 
             predictionData = pd.DataFrame({"Predicted":modelPrediction, "True":plottingNeutrons})
             predictionData["Error"] = ((predictionData["True"] - predictionData["Predicted"]) / predictionData["True"]) * 100
