@@ -3,6 +3,10 @@ import tensorflow as tf
 import matplotlib.pyplot as plt
 import numpy as np
 from decimal import Decimal
+from tensorflow.keras.callbacks import TensorBoard
+import time
+
+tensorboard = TensorBoard(log_dir='logs/test')
 
 plt.rcParams.update({'font.size': 16})
 
@@ -48,7 +52,7 @@ RecoilModel.compile(
 )
 
 # Training model
-RecoilModel.fit(protonTraining, neutronTraining, validation_data=(protonTesting, neutronTesting), epochs=10)
+RecoilModel.fit(protonTraining, neutronTraining, validation_data=(protonTesting, neutronTesting), epochs=10, callbacks=[tensorboard])
 
 # Saving model
 RecoilModel.save("NeutronEnergyPrediction.keras")

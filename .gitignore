@@ -4,3 +4,7 @@ testNN.py
 
 # Don't include data
 *.csv
+*.pdf
+
+# No logs
+logs/
