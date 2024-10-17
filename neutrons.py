@@ -46,7 +46,7 @@ def Style():
 def main():
 
     # Style()
-    iterations = 100000  # number of measurements used to estimate resolution
+    iterations = 1000000  # number of measurements used to estimate resolution
     c1 = TCanvas("Results")
     random_engine = TRandom3()
 
