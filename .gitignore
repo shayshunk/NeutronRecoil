@@ -8,3 +8,6 @@ testNN.py
 
 # No logs
 logs/
+
+# No neural network models
+*.keras

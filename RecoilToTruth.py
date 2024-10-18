@@ -44,6 +44,8 @@ denseLayers = [2, 3, 4, 5]
 layerSizes = [64, 128, 256, 512]
 batchSizes = [32, 64, 128]
 
+counter = 1
+
 for denseLayer in denseLayers:
     for layerSize in layerSizes:
         for batchSize in batchSizes:
@@ -62,14 +64,14 @@ for denseLayer in denseLayers:
 
             # Compiling model
             RecoilModel.compile(
-                optimizer="adam", loss="mean_squared_error", metrics=["mean_absolute_error", "mean_squared_error"]
+                optimizer="adam", loss="mean_squared_error", metrics=["mean_absolute_error"]
             )
 
             # Training model
             RecoilModel.fit(protonTraining, neutronTraining, batch_size=batchSize, validation_data=(protonTesting, neutronTesting), epochs=10, callbacks=[tensorboard])
 
             # Saving model
-            RecoilModel.save("NeutronEnergyPrediction.keras")
+            RecoilModel.save("{}.keras".format(NAME))
 
             # Predicting Phi
             modelPrediction = RecoilModel.predict(plottingProtons)
@@ -86,7 +88,7 @@ for denseLayer in denseLayers:
             print(plottingNeutrons.iloc[9]) """
 
             # Plotting
-            plt.figure(1)
+            plt.figure(counter)
             plt.plot(predictionData["True"], predictionData["Predicted"], linestyle='None', marker='.', markersize=4)
             plt.title("Predicted Neutron Energy vs True Neutron Energy")
             plt.xlabel("True Energy (MeV)")
@@ -94,3 +96,5 @@ for denseLayer in denseLayers:
             plt.ylabel("Predicted Energy (MeV)")
             plt.ylim(0, 5.5)
             plt.savefig("True Energy_{}.pdf".format(NAME), bbox_inches='tight')
+            
+            counter = counter+1
