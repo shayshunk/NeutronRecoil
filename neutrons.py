@@ -46,11 +46,11 @@ def Style():
 def main():
 
     # Style()
-    iterations = 1000000  # number of measurements used to estimate resolution
+    iterations = 10000  # number of measurements used to estimate resolution
     c1 = TCanvas("Results")
     random_engine = TRandom3()
 
-    neutron_energies = [1.0, 3.0, 5.0]  # [1.0, 3.0, 5.0] neutron beam kinetic energy [MeV]
+    neutron_energies = [1.0]  # [1.0, 3.0, 5.0] neutron beam kinetic energy [MeV]
     n_neutrons_detected = [20]  # [10,15,20,50,100]
     gas = ["Propane"]
 
@@ -204,7 +204,7 @@ def main():
     recoilArrayReshaped = recoilArray.reshape(recoilArray.shape[0], -1)
 
     np.savetxt(
-        "OutputData.csv",
+        "TestingData.csv",
         recoilArrayReshaped,
         delimiter=",",
         newline="\n",
