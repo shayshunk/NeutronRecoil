@@ -1,0 +1,16 @@
+# Don't include testing files
+testing.py
+testNN.py
+.directory
+
+# Don't include data
+*.csv
+*.pdf
+*.pkl
+
+# Folders
+Data/
+Plots/
+logs/
+Networks/
+__pycache__/
