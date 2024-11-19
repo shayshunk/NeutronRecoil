@@ -9,6 +9,7 @@ from math import sqrt
 import numpy as np
 import pandas as pd
 import random
+from tqdm import tqdm
 
 # Don't show plots
 ROOT.gROOT.SetBatch(1)
@@ -111,19 +112,20 @@ def main():
         180.0,
     )
 
-    for kinetic_energy in neutron_energies:
+    for kinetic_energy in tqdm(neutron_energies):
 
         # Lists for CSVs for training
         recoilList = []
 
-        for n_neutrons in n_neutrons_detected:
+        for n_neutrons in tqdm(n_neutrons_detected):
+
             h_angle_residual.Reset()
             h_energy_residual.Reset()
 
             NAME = "{0:.2f}_MeV".format(kinetic_energy)
 
-            for iteration in range(iterations):
-                kinetic_energy_random = random.uniform(0.0, 5.0)
+            for iteration in tqdm(range(iterations), leave=False):
+
                 E_n = neutron_mass + kinetic_energy
                 p_n = sqrt(E_n**2 - neutron_mass**2)
 
@@ -195,25 +197,25 @@ def main():
                         h_cos_angle_xaxis,
                     ]:
                         histogram.Draw()
-                        c1.Print("Plots/Generator" +
+                        c1.Print("Plots/Generator/" +
                                  histogram.GetName() + ".png")
 
                     for histogram in [h_theta_vs_phi, h_theta_vs_phi_weighted]:
                         histogram.GetXaxis().SetTitleOffset(1.6)
                         histogram.GetYaxis().SetTitleOffset(1.6)
                         histogram.Draw("lego1")
-                        c1.Print("Plots/Generator" +
+                        c1.Print("Plots/Generator/" +
                                  histogram.GetName() + "_lego.png")
 
                     for histogram in [h_theta_vs_phi, h_theta_vs_phi_weighted]:
                         histogram.Draw("surf3polz")
-                        c1.Print("Plots/Generator" +
+                        c1.Print("Plots/Generator/" +
                                  histogram.GetName() + "_surf3polz.png")
             c1.cd()
             for histogram in [h_angle_residual, h_energy_residual]:
                 histogram.Draw()
                 histogram.Fit("gaus", "Q")
-                c1.Print("Plots/Generator" +
+                c1.Print("Plots/Generator/" +
                          histogram.GetName()
                          + "_"
                          + str(kinetic_energy)
@@ -291,9 +293,9 @@ def find_beam_direction(protons, neutron_energy, debug=False):
         c2 = TCanvas("c2", "A Simple Graph Example", 200, 10, 700, 500)
         c2.cd()
         gr_phi.Draw("AP")
-        c2.Print("Plots/Generator" + "graph_phi.png")
+        c2.Print("Plots/Generator/" + "graph_phi.png")
         gr_theta.Draw("AP")
-        c2.Print("Plots/Generator" + "graph_theta.png")
+        c2.Print("Plots/Generator/" + "graph_theta.png")
         c2.DrawFrame(0, 0, todeg * pi / 2, 1.1 * neutron_energy)
         gr_dr.Draw("AP")
 
@@ -320,7 +322,7 @@ def find_beam_direction(protons, neutron_energy, debug=False):
     gr_dr.Fit("myfit", "Q")
 
     if debug is True:
-        c2.Print("Plots/Generator" + "graph_dr.png")
+        c2.Print("Plots/Generator/" + "graph_dr.png")
 
     fit = gr_dr.GetFunction("myfit")
     # Double_t chi2 = fit->GetChisquare();
