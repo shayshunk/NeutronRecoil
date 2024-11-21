@@ -25,7 +25,7 @@ def fit_func(x, a, mu, sigma):
 path = r'/home/shashank/Documents/Projects/NeutronRecoil/Networks/Continuous/'
 
 recoilModel = tf.keras.models.load_model(
-    path+"Continuous-5-dense-512-nodes-100-batch.keras")
+    path+"Continuous-5-dense-512-nodes-200-batch.keras")
 
 # Reading in truth and reconstructed data
 path = r'/home/shashank/Documents/Projects/NeutronRecoil/Data/Discrete/'
@@ -90,7 +90,7 @@ for energy, recoilData in zip(testingEnergies, recoilDatasets):
     plt.figtext(0.72, 0.75, fr'$\mu$ = {popt[1]:.3f}'+'\n' +
                 fr'$\sigma$ = {popt[2]:.3f}', fontsize=14)
 
-    plt.figtext(0.35, 0.75, f'True = {energy:.2f} MeV', fontsize=14)
+    plt.figtext(0.15, 0.75, f'True = {energy:.2f} MeV', fontsize=14)
 
     plt.savefig(path + f"Testing_{energy}.png", bbox_inches='tight')
 
@@ -107,16 +107,18 @@ plt.figure(3)
 fig, ax = plt.subplots()
 
 plt.scatter(testingEnergies, networkBias)
+plt.ylim(-0.05, 0.05)
 plt.title("Bias vs Energy")
 plt.xlabel("True Energy (MeV)")
-plt.ylabel("Network Mean Prediction Bias")
+plt.ylabel("Network Bias / Energy (MeV)")
 plt.savefig(path + "Network Biases.png", bbox_inches='tight')
 
 plt.figure(4)
 fig, ax = plt.subplots()
 
 plt.scatter(testingEnergies, networkSigma)
+plt.ylim(-0.05, 0.05)
 plt.title("Uncertainty vs Energy")
 plt.xlabel("True Energy (MeV)")
-plt.ylabel("Network Uncertainty (Gaussian)")
+plt.ylabel("Network Uncertainty / Energy (MeV)")
 plt.savefig(path + "Network Sigmas.png", bbox_inches='tight')

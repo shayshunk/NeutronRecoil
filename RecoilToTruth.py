@@ -42,8 +42,8 @@ recoilData = recoilData.sample(frac=1).reset_index(drop=True)
 print(recoilData.head(20))
 
 # Splitting data into training and testing labels, saving 25% for testing
-trainingData = recoilData.iloc[:9000000, :]
-testingData = recoilData.iloc[9000000:, :]
+trainingData = recoilData.iloc[:13000000, :]
+testingData = recoilData.iloc[13000000:, :]
 
 # Extracting proton data vs neutron data
 neutronTraining = trainingData.iloc[:, 60]
@@ -61,7 +61,7 @@ plottingNeutrons.reset_index(drop=True, inplace=True)
 plottingNeutrons = plottingNeutrons * 5
 
 # Defining model
-denseLayers = [5]
+denseLayers = [3, 4, 5]
 layerSizes = [256, 512]
 batchSizes = [50, 100, 200]
 

@@ -61,7 +61,7 @@ def main():
 
     # neutron beam kinetic energy [MeV]
     neutron_energies = [5.5]
-    n_neutrons_detected = [20]  # [10,15,20,50,100]
+    n_neutrons_detected = [40]  # [10,15,20,50,100]
     gas = ["Propane"]
 
     h_angle_residual = TH1F(
@@ -124,7 +124,7 @@ def main():
             NAME = "{0:.2f}_MeV".format(kinetic_energy)
 
             for iteration in tqdm(range(iterations)):
-                kinetic_energy_random = random.uniform(0.0, 5.5)
+                kinetic_energy_random = random.uniform(0.0, 5)
                 E_n = neutron_mass + kinetic_energy_random
                 p_n = sqrt(E_n**2 - neutron_mass**2)
 
@@ -222,7 +222,7 @@ def main():
 
             recoilArray = pd.DataFrame(recoilList)
             recoilArray.to_pickle(
-                'Data/Continuous/ContinuousTraining_{}.pkl'.format(NAME))
+                'Data/Continuous/40_Recoils/TestingDataContinuous_{}.pkl'.format(NAME))
 
     print("Done!")
     print("Recoil list shape:", recoilArray.shape)
