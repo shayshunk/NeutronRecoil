@@ -22,10 +22,10 @@ def fit_func(x, a, mu, sigma):
 
 
 # Reading in models
-path = r'/home/shashank/Documents/Projects/NeutronRecoil/Networks/Discrete/'
+path = r'/home/shashank/Documents/Projects/NeutronRecoil/Networks/Continuous/'
 
 recoilModel = tf.keras.models.load_model(
-    path+"Continuous-3-dense-512-nodes-100-batch.keras")
+    path+"Continuous-5-dense-512-nodes-100-batch.keras")
 
 # Reading in truth and reconstructed data
 path = r'/home/shashank/Documents/Projects/NeutronRecoil/Data/Discrete/'
@@ -53,6 +53,7 @@ for dataset in datasets:
 
 networkBias = []
 networkSigma = []
+path = r'/home/shashank/Documents/Projects/NeutronRecoil/Plots/Continuous/'
 
 for energy, recoilData in zip(testingEnergies, recoilDatasets):
 
@@ -89,15 +90,17 @@ for energy, recoilData in zip(testingEnergies, recoilDatasets):
     plt.figtext(0.72, 0.75, fr'$\mu$ = {popt[1]:.3f}'+'\n' +
                 fr'$\sigma$ = {popt[2]:.3f}', fontsize=14)
 
-    plt.savefig(f"Plots/Discrete/Testing_{energy}.png", bbox_inches='tight')
+    plt.figtext(0.35, 0.75, f'True = {energy:.2f} MeV', fontsize=14)
 
-    plt.close(1)
+    plt.savefig(path + f"Testing_{energy}.png", bbox_inches='tight')
+
+    plt.close()
 
     mean = popt[1]
     std = popt[2]
 
-    networkBias.append(mean - energy)
-    networkSigma.append(std)
+    networkBias.append((mean - energy) / energy)
+    networkSigma.append(std / energy)
 
 
 plt.figure(3)
@@ -107,7 +110,7 @@ plt.scatter(testingEnergies, networkBias)
 plt.title("Bias vs Energy")
 plt.xlabel("True Energy (MeV)")
 plt.ylabel("Network Mean Prediction Bias")
-plt.savefig("Network Biases.png")
+plt.savefig(path + "Network Biases.png", bbox_inches='tight')
 
 plt.figure(4)
 fig, ax = plt.subplots()
@@ -116,4 +119,4 @@ plt.scatter(testingEnergies, networkSigma)
 plt.title("Uncertainty vs Energy")
 plt.xlabel("True Energy (MeV)")
 plt.ylabel("Network Uncertainty (Gaussian)")
-plt.savefig("Network Sigmas.png")
+plt.savefig(path + "Network Sigmas.png", bbox_inches='tight')

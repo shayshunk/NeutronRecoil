@@ -54,7 +54,7 @@ def Style():
 def main():
 
     # Style()
-    iterations = 10000000  # number of measurements used to estimate resolution
+    iterations = 15000000  # number of measurements used to estimate resolution
     counter = 0
     c1 = TCanvas("Results")
     random_engine = TRandom3()
@@ -124,7 +124,7 @@ def main():
             NAME = "{0:.2f}_MeV".format(kinetic_energy)
 
             for iteration in tqdm(range(iterations)):
-                kinetic_energy_random = random.uniform(0.0, 5.2)
+                kinetic_energy_random = random.uniform(0.0, 5.5)
                 E_n = neutron_mass + kinetic_energy_random
                 p_n = sqrt(E_n**2 - neutron_mass**2)
 

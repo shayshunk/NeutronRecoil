@@ -61,9 +61,9 @@ plottingNeutrons.reset_index(drop=True, inplace=True)
 plottingNeutrons = plottingNeutrons * 5
 
 # Defining model
-denseLayers = [3, 4]
+denseLayers = [5]
 layerSizes = [256, 512]
-batchSizes = [100, 200]
+batchSizes = [50, 100, 200]
 
 counter = 1
 
