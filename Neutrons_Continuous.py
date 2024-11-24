@@ -61,7 +61,7 @@ def main():
 
     # neutron beam kinetic energy [MeV]
     neutron_energies = [5.5]
-    n_neutrons_detected = [40]  # [10,15,20,50,100]
+    n_neutrons_detected = [10]  # [10,15,20,50,100]
     gas = ["Propane"]
 
     h_angle_residual = TH1F(
@@ -222,7 +222,7 @@ def main():
 
             recoilArray = pd.DataFrame(recoilList)
             recoilArray.to_pickle(
-                'Data/Continuous/40_Recoils/TestingDataContinuous_{}.pkl'.format(NAME))
+                'Data/Continuous/10_Recoils/TestingDataContinuous_{}.pkl'.format(NAME))
 
     print("Done!")
     print("Recoil list shape:", recoilArray.shape)

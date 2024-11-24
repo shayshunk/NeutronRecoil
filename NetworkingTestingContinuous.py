@@ -22,13 +22,13 @@ def fit_func(x, a, mu, sigma):
 
 
 # Reading in models
-path = r'/home/shashank/Documents/Projects/NeutronRecoil/Networks/Continuous/'
+path = r'/home/shashank/Documents/Projects/NeutronRecoil/Networks/Continuous/10_Recoils/'
 
 recoilModel = tf.keras.models.load_model(
     path+"Continuous-5-dense-512-nodes-200-batch.keras")
 
 # Reading in truth and reconstructed data
-path = r'/home/shashank/Documents/Projects/NeutronRecoil/Data/Discrete/'
+path = r'/home/shashank/Documents/Projects/NeutronRecoil/Data/Discrete/10_Recoils/'
 datasets = glob.glob(os.path.join(path, "DiscreteTesting_*.pkl"))
 
 recoilDatasets = []
@@ -40,12 +40,12 @@ for dataset in datasets:
 
     recoilData = pd.read_pickle(dataset)
 
-    neutronData = recoilData.iloc[:, 60]
+    neutronData = recoilData.iloc[:, 30]
     neutronData = neutronData * 5
 
     testingEnergies.append(neutronData.iloc[0])
 
-    recoilData = recoilData.drop(60, axis=1)
+    recoilData = recoilData.drop(30, axis=1)
 
     recoilDatasets.append(recoilData)
 
@@ -53,7 +53,7 @@ for dataset in datasets:
 
 networkBias = []
 networkSigma = []
-path = r'/home/shashank/Documents/Projects/NeutronRecoil/Plots/Continuous/'
+path = r'/home/shashank/Documents/Projects/NeutronRecoil/Plots/Continuous/10_Recoils/'
 
 for energy, recoilData in zip(testingEnergies, recoilDatasets):
 

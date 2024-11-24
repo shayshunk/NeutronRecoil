@@ -60,8 +60,8 @@ def main():
     random_engine = TRandom3()
 
     # neutron beam kinetic energy [MeV]
-    neutron_energies = np.linspace(1.0, 5.0, 50)
-    n_neutrons_detected = [20]  # [10,15,20,50,100]
+    neutron_energies = np.linspace(0.01, 5.0, 60)
+    n_neutrons_detected = [10]  # [10,15,20,50,100]
     gas = ["Propane"]
 
     h_angle_residual = TH1F(
@@ -230,7 +230,7 @@ def main():
 
             recoilArray = pd.DataFrame(recoilList)
             recoilArray.to_pickle(
-                'Data/Continuous/DiscreteTesting_{}.pkl'.format(NAME))
+                'Data/Discrete/10_Recoils/DiscreteTesting_{}.pkl'.format(NAME))
 
     print("Done!")
     print("Recoil list shape:", recoilArray.shape)
