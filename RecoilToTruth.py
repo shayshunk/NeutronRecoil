@@ -23,7 +23,7 @@ plt.rcParams.update({'font.size': 16})
 
 # Reading in truth and reconstructed data
 path = r'/home/shashank/Documents/Projects/NeutronRecoil/Data/Continuous/10_Recoils/'
-files = glob.glob(os.path.join(path, "ContinuousTraining_5.50_MeV.pkl"))
+files = glob.glob(os.path.join(path, "ContinuousTraining*.pkl"))
 
 recoilData = pd.DataFrame()
 li = []
@@ -42,8 +42,8 @@ recoilData = recoilData.sample(frac=1).reset_index(drop=True)
 print(recoilData.head(20))
 
 # Splitting data into training and testing labels, saving 25% for testing
-trainingData = recoilData.iloc[:13000000, :]
-testingData = recoilData.iloc[13000000:, :]
+trainingData = recoilData.iloc[:9000000, :]
+testingData = recoilData.iloc[9000000:, :]
 
 # Extracting proton data vs neutron data
 neutronTraining = trainingData.iloc[:, 30]
@@ -100,7 +100,7 @@ for denseLayer in denseLayers:
 
             # Training model
             RecoilModel.fit(protonTraining, neutronTraining, batch_size=batchSize, validation_data=(
-                protonTesting, neutronTesting), epochs=4, callbacks=[tensorboard])
+                protonTesting, neutronTesting), epochs=10, callbacks=[tensorboard])
 
             # Saving model
             RecoilModel.save("Networks/Continuous/{}.keras".format(NAME))
@@ -134,6 +134,6 @@ for denseLayer in denseLayers:
             plt.ylabel("Predicted Energy (MeV)")
             plt.ylim(0, 5.5)
             plt.savefig(
-                "Plots/Continuous/True Energy Continuous_{}.png".format(NAME), bbox_inches='tight')
+                "Plots/Continuous/10_Recoils/True Energy Continuous_{}.png".format(NAME), bbox_inches='tight')
 
             counter = counter+1

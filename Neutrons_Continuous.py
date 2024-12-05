@@ -67,6 +67,11 @@ def main():
     neutronString = input("Enter number of neutrons detected: ")
     n_neutrons = int(neutronString)
 
+    smearing = input(
+        "Do you want detector smearing? (y/n) ").lower().strip() == 'y'
+
+    print("Smearing set to: ", smearing)
+
     fileNameString = input("Enter file name for saving: ")
 
     gas = ["Propane"]
@@ -150,7 +155,8 @@ def main():
                 random_engine, n_neutrons, incoming_neutron, gas
             )
 
-            reco_protons = proton_detection(random_engine, true_protons)
+            reco_protons = proton_detection(
+                random_engine, true_protons, smearing)
 
             recoilSet = []
 
@@ -381,7 +387,7 @@ def sigma_energy(kinetic_energy):
     return sigma_energy
 
 
-def proton_detection(random_engine, true_protons):
+def proton_detection(random_engine, true_protons, smear):
     detected = []
 
     for proton in true_protons:
@@ -390,14 +396,21 @@ def proton_detection(random_engine, true_protons):
         kin_energy = proton.E() - mass
         direction = TVector3(proton.Vect())
 
-        sigma = sigma_energy(kin_energy)
-        measured_energy = random_engine.Gaus(kin_energy, sigma)
+        if (smear == True):
+            sigma = sigma_energy(kin_energy)
+            measured_energy = random_engine.Gaus(kin_energy, sigma)
+            measured_phi = direction.Phi() + random_engine.Gaus(0, sigma_phi_radians)
+            measured_theta = direction.Theta() + random_engine.Gaus(0, sigma_theta_radians)
+        else:
+            measured_energy = kin_energy
+            measured_phi = direction.Phi()
+            measured_theta = direction.Theta()
+
         if measured_energy <= 0:
             measured_energy = 0
+
         new_energy = mass + measured_energy
 
-        measured_phi = direction.Phi() + random_engine.Gaus(0, sigma_phi_radians)
-        measured_theta = direction.Theta() + random_engine.Gaus(0, sigma_theta_radians)
         direction.SetPhi(measured_phi)
         direction.SetTheta(measured_theta)
         direction.SetMag(sqrt(new_energy**2 - mass**2)

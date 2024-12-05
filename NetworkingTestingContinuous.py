@@ -22,13 +22,13 @@ def fit_func(x, a, mu, sigma):
 
 
 # Reading in models
-path = r'/home/shashank/Documents/Projects/NeutronRecoil/Networks/Continuous/10_Recoils/'
+path = r'/home/shashank/Documents/Projects/NeutronRecoil/Networks/Continuous/20_Recoils/'
 
 recoilModel = tf.keras.models.load_model(
     path+"Continuous-5-dense-512-nodes-200-batch.keras")
 
 # Reading in truth and reconstructed data
-path = r'/home/shashank/Documents/Projects/NeutronRecoil/Data/Discrete/10_Recoils/'
+path = r'/home/shashank/Documents/Projects/NeutronRecoil/Data/Discrete/20_Recoils/'
 datasets = glob.glob(os.path.join(path, "DiscreteTesting_*.pkl"))
 
 recoilDatasets = []
@@ -40,12 +40,12 @@ for dataset in datasets:
 
     recoilData = pd.read_pickle(dataset)
 
-    neutronData = recoilData.iloc[:, 30]
+    neutronData = recoilData.iloc[:, 60]
     neutronData = neutronData * 5
 
     testingEnergies.append(neutronData.iloc[0])
 
-    recoilData = recoilData.drop(30, axis=1)
+    recoilData = recoilData.drop(60, axis=1)
 
     recoilDatasets.append(recoilData)
 
@@ -53,7 +53,7 @@ for dataset in datasets:
 
 networkBias = []
 networkSigma = []
-path = r'/home/shashank/Documents/Projects/NeutronRecoil/Plots/Continuous/10_Recoils/'
+path = r'/home/shashank/Documents/Projects/NeutronRecoil/Plots/Continuous/20_Recoils/'
 
 for energy, recoilData in zip(testingEnergies, recoilDatasets):
 
@@ -83,7 +83,7 @@ for energy, recoilData in zip(testingEnergies, recoilDatasets):
              color='red', linewidth=1.5, alpha=0.85)
 
     plt.title("Neural Network Performance")
-    plt.xlabel("Predicted Energy (MeV)")
+    plt.xlabel("Predicted Energy")
     plt.ylabel("Counts")
 
     # Add the fit parameters to the plot
@@ -110,7 +110,7 @@ plt.scatter(testingEnergies, networkBias)
 plt.ylim(-0.05, 0.05)
 plt.title("Bias vs Energy")
 plt.xlabel("True Energy (MeV)")
-plt.ylabel("Network Bias / Energy (MeV)")
+plt.ylabel("Network Bias / Energy")
 plt.savefig(path + "Network Biases.png", bbox_inches='tight')
 
 plt.figure(4)
@@ -120,5 +120,5 @@ plt.scatter(testingEnergies, networkSigma)
 plt.ylim(-0.05, 0.05)
 plt.title("Uncertainty vs Energy")
 plt.xlabel("True Energy (MeV)")
-plt.ylabel("Network Uncertainty / Energy (MeV)")
+plt.ylabel("Network Uncertainty / Energy)")
 plt.savefig(path + "Network Sigmas.png", bbox_inches='tight')
