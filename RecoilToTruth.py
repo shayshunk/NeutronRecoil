@@ -22,8 +22,8 @@ if gpus:
 plt.rcParams.update({'font.size': 16})
 
 # Reading in truth and reconstructed data
-path = r'/home/shashank/Documents/Projects/NeutronRecoil/Data/Continuous/10_Recoils/'
-files = glob.glob(os.path.join(path, "ContinuousTraining*.pkl"))
+path = r'/home/shashank/Documents/Projects/NeutronRecoil/Data/Continuous/20_Recoils/'
+files = glob.glob(os.path.join(path, "ContinuousTraining_NoSmear*.pkl"))
 
 recoilData = pd.DataFrame()
 li = []
@@ -46,11 +46,11 @@ trainingData = recoilData.iloc[:9000000, :]
 testingData = recoilData.iloc[9000000:, :]
 
 # Extracting proton data vs neutron data
-neutronTraining = trainingData.iloc[:, 30]
-protonTraining = trainingData.drop(30, axis=1)
+neutronTraining = trainingData.iloc[:, 60]
+protonTraining = trainingData.drop(60, axis=1)
 
-neutronTesting = testingData.iloc[:, 30]
-protonTesting = testingData.drop(30, axis=1)
+neutronTesting = testingData.iloc[:, 60]
+protonTesting = testingData.drop(60, axis=1)
 
 # Grabbing last 1000 data points for plotting
 plottingProtons = protonTesting.iloc[-1000:, :]
@@ -82,7 +82,7 @@ for denseLayer in denseLayers:
             tensorboard = TensorBoard(
                 log_dir='logs/Continuous/{}'.format(NAME))
 
-            input_layer = tf.keras.layers.Input(shape=(30,))
+            input_layer = tf.keras.layers.Input(shape=(60,))
             RecoilModel = tf.keras.models.Sequential()
             RecoilModel.add(tf.keras.layers.Dense(
                 layerSize, activation="relu"))
@@ -134,6 +134,6 @@ for denseLayer in denseLayers:
             plt.ylabel("Predicted Energy (MeV)")
             plt.ylim(0, 5.5)
             plt.savefig(
-                "Plots/Continuous/10_Recoils/True Energy Continuous_{}.png".format(NAME), bbox_inches='tight')
+                "Plots/Continuous/20_Recoils/True Energy Continuous_{}.png".format(NAME), bbox_inches='tight')
 
             counter = counter+1

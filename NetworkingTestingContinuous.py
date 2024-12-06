@@ -25,7 +25,7 @@ def fit_func(x, a, mu, sigma):
 path = r'/home/shashank/Documents/Projects/NeutronRecoil/Networks/Continuous/20_Recoils/'
 
 recoilModel = tf.keras.models.load_model(
-    path+"Continuous-5-dense-512-nodes-200-batch.keras")
+    path+"Continuous-5-dense-512-nodes-200-batch-NoSmear.keras")
 
 # Reading in truth and reconstructed data
 path = r'/home/shashank/Documents/Projects/NeutronRecoil/Data/Discrete/20_Recoils/'
@@ -99,8 +99,8 @@ for energy, recoilData in zip(testingEnergies, recoilDatasets):
     mean = popt[1]
     std = popt[2]
 
-    networkBias.append((mean - energy) / energy)
-    networkSigma.append(std / energy)
+    networkBias.append((mean - energy))
+    networkSigma.append(std)
 
 
 plt.figure(3)
@@ -110,7 +110,7 @@ plt.scatter(testingEnergies, networkBias)
 plt.ylim(-0.05, 0.05)
 plt.title("Bias vs Energy")
 plt.xlabel("True Energy (MeV)")
-plt.ylabel("Network Bias / Energy")
+plt.ylabel("Network Bias (MeV)")
 plt.savefig(path + "Network Biases.png", bbox_inches='tight')
 
 plt.figure(4)
@@ -120,5 +120,5 @@ plt.scatter(testingEnergies, networkSigma)
 plt.ylim(-0.05, 0.05)
 plt.title("Uncertainty vs Energy")
 plt.xlabel("True Energy (MeV)")
-plt.ylabel("Network Uncertainty / Energy)")
+plt.ylabel("Network Uncertainty")
 plt.savefig(path + "Network Sigmas.png", bbox_inches='tight')
