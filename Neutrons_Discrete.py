@@ -71,6 +71,9 @@ def main():
 
     fileNameString = input("Enter file name for saving: ")
 
+    if (smearing != True):
+        fileNameString = fileNameString + "-NoSmear"
+
     h_angle_residual = TH1F(
         "neutron_angle_residual", "neutron angle residual (degrees)", 100, -
         10, 10
