@@ -22,7 +22,7 @@ if gpus:
 plt.rcParams.update({'font.size': 16})
 
 # Reading in truth and reconstructed data
-path = r'/home/shashank/Documents/Projects/NeutronRecoil/Data/Continuous/20_Recoils/'
+path = r'/home/shashank/Documents/Projects/NeutronRecoil/Data/Continuous/40_Recoils/'
 files = glob.glob(os.path.join(path, "ContinuousTraining_NoSmear*.pkl"))
 
 recoilData = pd.DataFrame()
@@ -46,11 +46,11 @@ trainingData = recoilData.iloc[:9000000, :]
 testingData = recoilData.iloc[9000000:, :]
 
 # Extracting proton data vs neutron data
-neutronTraining = trainingData.iloc[:, 60]
-protonTraining = trainingData.drop(60, axis=1)
+neutronTraining = trainingData.iloc[:, 120]
+protonTraining = trainingData.drop(120, axis=1)
 
-neutronTesting = testingData.iloc[:, 60]
-protonTesting = testingData.drop(60, axis=1)
+neutronTesting = testingData.iloc[:, 120]
+protonTesting = testingData.drop(120, axis=1)
 
 # Grabbing last 1000 data points for plotting
 plottingProtons = protonTesting.iloc[-1000:, :]
@@ -82,7 +82,7 @@ for denseLayer in denseLayers:
             tensorboard = TensorBoard(
                 log_dir='logs/Continuous/{}'.format(NAME))
 
-            input_layer = tf.keras.layers.Input(shape=(60,))
+            input_layer = tf.keras.layers.Input(shape=(120,))
             RecoilModel = tf.keras.models.Sequential()
             RecoilModel.add(tf.keras.layers.Dense(
                 layerSize, activation="relu"))
@@ -103,7 +103,8 @@ for denseLayer in denseLayers:
                 protonTesting, neutronTesting), epochs=10, callbacks=[tensorboard])
 
             # Saving model
-            RecoilModel.save("Networks/Continuous/{}.keras".format(NAME))
+            RecoilModel.save(
+                "Networks/Continuous/40_Recoils/{}.keras".format(NAME))
 
             # Predicting Phi
             modelPrediction = RecoilModel.predict(plottingProtons)
@@ -134,6 +135,6 @@ for denseLayer in denseLayers:
             plt.ylabel("Predicted Energy (MeV)")
             plt.ylim(0, 5.5)
             plt.savefig(
-                "Plots/Continuous/20_Recoils/True Energy Continuous_{}.png".format(NAME), bbox_inches='tight')
+                "Plots/Continuous/40_Recoils/True Energy Continuous_{}.png".format(NAME), bbox_inches='tight')
 
             counter = counter+1

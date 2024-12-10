@@ -61,13 +61,15 @@ def main():
 
     # neutron beam kinetic energy [MeV]
     neutron_energies = np.linspace(0.01, 5.5, 66)
-    n_neutrons_detected = [20]  # [10,15,20,50,100]
+    neutronString = input("Enter number of neutrons detected: ")
+    n_neutrons = int(neutronString)
     gas = ["Propane"]
 
     smearing = input(
         "Do you want detector smearing? (y/n) ").lower().strip() == 'y'
-
     print("Smearing set to: ", smearing)
+
+    fileNameString = input("Enter file name for saving: ")
 
     h_angle_residual = TH1F(
         "neutron_angle_residual", "neutron angle residual (degrees)", 100, -
@@ -122,121 +124,118 @@ def main():
         # Lists for CSVs for training
         recoilList = []
 
-        for n_neutrons in tqdm(n_neutrons_detected):
+        h_angle_residual.Reset()
+        h_energy_residual.Reset()
 
-            h_angle_residual.Reset()
-            h_energy_residual.Reset()
+        NAME = "{0:.2f}_MeV".format(kinetic_energy)
 
-            NAME = "{0:.2f}_MeV".format(kinetic_energy)
+        for iteration in tqdm(range(iterations), leave=False):
 
-            for iteration in tqdm(range(iterations), leave=False):
+            E_n = neutron_mass + kinetic_energy
+            p_n = sqrt(E_n**2 - neutron_mass**2)
 
-                E_n = neutron_mass + kinetic_energy
-                p_n = sqrt(E_n**2 - neutron_mass**2)
+            # incoming neutron beam is in x-direction
+            p3_n = TVector3(p_n, 0, 0)
+            incoming_neutron = TLorentzVector(p3_n, E_n)
 
-                # incoming neutron beam is in x-direction
-                p3_n = TVector3(p_n, 0, 0)
-                incoming_neutron = TLorentzVector(p3_n, E_n)
+            debug = False
+            counter = counter+1
+            if iteration == 10:
+                debug = True
+            #
+            # the actual simulation happens here
+            #
 
-                debug = False
-                counter = counter+1
-                if iteration == 10:
-                    debug = True
-                #
-                # the actual simulation happens here
-                #
+            # Progress tracker
+            if counter % 10000 == 0:
+                print("Progress: ", counter/20000, "%")
 
-                # Progress tracker
-                if counter % 10000 == 0:
-                    print("Progress: ", counter/20000, "%")
+            # estimate how well we can measure incoming neutron beam direction based on n neutrons
+            true_protons = proton_scattering(
+                random_engine, n_neutrons, incoming_neutron, gas
+            )
 
-                # estimate how well we can measure incoming neutron beam direction based on n neutrons
-                true_protons = proton_scattering(
-                    random_engine, n_neutrons, incoming_neutron, gas
-                )
+            reco_protons = proton_detection(
+                random_engine, true_protons, smearing)
 
-                reco_protons = proton_detection(
-                    random_engine, true_protons, smearing)
+            recoilSet = []
 
-                recoilSet = []
+            for proton in reco_protons:
+                recoilSet.append((proton.E() - proton.M()) / 5.2)
+                recoilSet.append(proton.Theta() / 3.2)
+                recoilSet.append((proton.Phi() + 3) / 6.3)
 
+            recoilSet.append(kinetic_energy / 5)
+            recoilList.append(recoilSet)
+
+            energy, angle = find_beam_direction(
+                reco_protons, kinetic_energy, debug)
+            h_angle_residual.Fill((angle - 0.0))
+            h_energy_residual.Fill(
+                (energy - kinetic_energy) / kinetic_energy)
+            # if fabs((energy - kinetic_energy)/kinetic_energy) > 0.1:
+            #    print "ERROR: aborting due to large error. Iteration =", iteration
+            #    return
+
+            if debug is True:
+                # make "event displays" for one event (consisting of n proton recoils)
                 for proton in reco_protons:
-                    recoilSet.append((proton.E() - proton.M()) / 5.2)
-                    recoilSet.append(proton.Theta() / 3.2)
-                    recoilSet.append((proton.Phi() + 3) / 6.3)
+                    energy = proton.E() - proton.M()  # kinetic energy
+                    h_theta.Fill(proton.Theta())
+                    h_phi.Fill(proton.Phi())
+                    h_angle_xaxis.Fill(proton.Angle(xaxis))
+                    h_cos_angle_xaxis.Fill(TMath.Cos(proton.Angle(xaxis)))
+                    h_energy_xaxis.Fill(proton.Angle(xaxis), energy)
+                    h_energy.Fill(energy)
+                    h_theta_vs_phi.Fill(
+                        proton.Theta() * todeg, proton.Phi() * todeg
+                    )
+                    h_theta_vs_phi_weighted.Fill(
+                        proton.Theta() * todeg, proton.Phi() * todeg, energy
+                    )
 
-                recoilSet.append(kinetic_energy / 5)
-                recoilList.append(recoilSet)
+                for histogram in [
+                    h_phi,
+                    h_theta,
+                    h_angle_xaxis,
+                    h_energy_xaxis,
+                    h_energy,
+                    h_cos_angle_xaxis,
+                ]:
+                    histogram.Draw()
+                    c1.Print("Plots/Generator/" +
+                             histogram.GetName() + ".png")
 
-                energy, angle = find_beam_direction(
-                    reco_protons, kinetic_energy, debug)
-                h_angle_residual.Fill((angle - 0.0))
-                h_energy_residual.Fill(
-                    (energy - kinetic_energy) / kinetic_energy)
-                # if fabs((energy - kinetic_energy)/kinetic_energy) > 0.1:
-                #    print "ERROR: aborting due to large error. Iteration =", iteration
-                #    return
+                for histogram in [h_theta_vs_phi, h_theta_vs_phi_weighted]:
+                    histogram.GetXaxis().SetTitleOffset(1.6)
+                    histogram.GetYaxis().SetTitleOffset(1.6)
+                    histogram.Draw("lego1")
+                    c1.Print("Plots/Generator/" +
+                             histogram.GetName() + "_lego.png")
 
-                if debug is True:
-                    # make "event displays" for one event (consisting of n proton recoils)
-                    for proton in reco_protons:
-                        energy = proton.E() - proton.M()  # kinetic energy
-                        h_theta.Fill(proton.Theta())
-                        h_phi.Fill(proton.Phi())
-                        h_angle_xaxis.Fill(proton.Angle(xaxis))
-                        h_cos_angle_xaxis.Fill(TMath.Cos(proton.Angle(xaxis)))
-                        h_energy_xaxis.Fill(proton.Angle(xaxis), energy)
-                        h_energy.Fill(energy)
-                        h_theta_vs_phi.Fill(
-                            proton.Theta() * todeg, proton.Phi() * todeg
-                        )
-                        h_theta_vs_phi_weighted.Fill(
-                            proton.Theta() * todeg, proton.Phi() * todeg, energy
-                        )
-
-                    for histogram in [
-                        h_phi,
-                        h_theta,
-                        h_angle_xaxis,
-                        h_energy_xaxis,
-                        h_energy,
-                        h_cos_angle_xaxis,
-                    ]:
-                        histogram.Draw()
-                        c1.Print("Plots/Generator/" +
-                                 histogram.GetName() + ".png")
-
-                    for histogram in [h_theta_vs_phi, h_theta_vs_phi_weighted]:
-                        histogram.GetXaxis().SetTitleOffset(1.6)
-                        histogram.GetYaxis().SetTitleOffset(1.6)
-                        histogram.Draw("lego1")
-                        c1.Print("Plots/Generator/" +
-                                 histogram.GetName() + "_lego.png")
-
-                    for histogram in [h_theta_vs_phi, h_theta_vs_phi_weighted]:
-                        histogram.Draw("surf3polz")
-                        c1.Print("Plots/Generator/" +
-                                 histogram.GetName() + "_surf3polz.png")
-            c1.cd()
-            for histogram in [h_angle_residual, h_energy_residual]:
-                histogram.Draw()
-                histogram.Fit("gaus", "Q")
-                c1.Print("Plots/Generator/" +
-                         histogram.GetName()
-                         + "_"
-                         + str(kinetic_energy)
-                         + "MeV_"
-                         + str(n_neutrons)
-                         + "neutrons.png"
-                         )
-        # fit = gr_dr.GetFunction("myfit");
-        # Double_t chi2 = fit->GetChisquare();
-        # energy = fit.GetParameter(0);
-        # angle  = fit.GetParameter(1);
-
-            recoilArray = pd.DataFrame(recoilList)
-            recoilArray.to_pickle(
-                'Data/Discrete/20_Recoils/DiscreteTesting_{}.pkl'.format(NAME))
+                for histogram in [h_theta_vs_phi, h_theta_vs_phi_weighted]:
+                    histogram.Draw("surf3polz")
+                    c1.Print("Plots/Generator/" +
+                             histogram.GetName() + "_surf3polz.png")
+        c1.cd()
+        for histogram in [h_angle_residual, h_energy_residual]:
+            histogram.Draw()
+            histogram.Fit("gaus", "Q")
+            c1.Print("Plots/Generator/" +
+                     histogram.GetName()
+                     + "_"
+                     + str(kinetic_energy)
+                     + "MeV_"
+                     + str(n_neutrons)
+                     + "neutrons.png"
+                     )
+    # fit = gr_dr.GetFunction("myfit");
+    # Double_t chi2 = fit->GetChisquare();
+    # energy = fit.GetParameter(0);
+    # angle  = fit.GetParameter(1);
+        path = 'Data/Discrete/' + neutronString + '_Recoils/' + fileNameString
+        recoilArray = pd.DataFrame(recoilList)
+        recoilArray.to_pickle(path + '_{}.pkl'.format(NAME))
 
     print("Done!")
     print("Recoil list shape:", recoilArray.shape)
@@ -437,3 +436,6 @@ def random_unit_vector(rnd):
     dummy.SetTheta(fTheta)
     dummy.SetPhi(fPhi)
     return dummy
+
+
+main()
