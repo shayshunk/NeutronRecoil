@@ -22,8 +22,18 @@ if gpus:
 plt.rcParams.update({'font.size': 16})
 
 # Reading in truth and reconstructed data
-path = r'/home/shashank/Documents/Projects/NeutronRecoil/Data/Continuous/40_Recoils/'
-files = glob.glob(os.path.join(path, "ContinuousTraining_NoSmear*.pkl"))
+recoils = input("Enter how many recoils to train for: ")
+dataPoints = 3 * int(recoils)
+path = r'/home/shashank/Documents/Projects/NeutronRecoil/Data/Continuous/' + \
+    recoils + '_Recoils/'
+
+smearing = input(
+    "Do you want detector smearing? (y/n) ").lower().strip() == 'y'
+
+if (smearing):
+    files = glob.glob(os.path.join(path, "ContinuousTraining_*.pkl"))
+else:
+    files = glob.glob(os.path.join(path, "ContinuousTraining_NoSmear*.pkl"))
 
 recoilData = pd.DataFrame()
 li = []
@@ -42,15 +52,15 @@ recoilData = recoilData.sample(frac=1).reset_index(drop=True)
 print(recoilData.head(20))
 
 # Splitting data into training and testing labels, saving 25% for testing
-trainingData = recoilData.iloc[:9000000, :]
-testingData = recoilData.iloc[9000000:, :]
+trainingData = recoilData.iloc[:14000000, :]
+testingData = recoilData.iloc[14000000:, :]
 
 # Extracting proton data vs neutron data
-neutronTraining = trainingData.iloc[:, 120]
-protonTraining = trainingData.drop(120, axis=1)
+neutronTraining = trainingData.iloc[:, dataPoints]
+protonTraining = trainingData.drop(dataPoints, axis=1)
 
-neutronTesting = testingData.iloc[:, 120]
-protonTesting = testingData.drop(120, axis=1)
+neutronTesting = testingData.iloc[:, dataPoints]
+protonTesting = testingData.drop(dataPoints, axis=1)
 
 # Grabbing last 1000 data points for plotting
 plottingProtons = protonTesting.iloc[-1000:, :]
@@ -82,7 +92,7 @@ for denseLayer in denseLayers:
             tensorboard = TensorBoard(
                 log_dir='logs/Continuous/{}'.format(NAME))
 
-            input_layer = tf.keras.layers.Input(shape=(120,))
+            input_layer = tf.keras.layers.Input(shape=(dataPoints,))
             RecoilModel = tf.keras.models.Sequential()
             RecoilModel.add(tf.keras.layers.Dense(
                 layerSize, activation="relu"))
