@@ -132,7 +132,7 @@ def main():
 
         NAME = "{0:.2f}_MeV".format(kinetic_energy)
 
-        for iteration in tqdm(range(iterations), leave=False):
+        for iteration in tqdm(range(iterations), leave=True):
 
             E_n = neutron_mass + kinetic_energy
             p_n = sqrt(E_n**2 - neutron_mass**2)
