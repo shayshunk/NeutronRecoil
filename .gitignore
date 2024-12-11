@@ -1,6 +1,7 @@
 # Don't include testing files
 testing.py
 testNN.py
+tester.py
 .directory
 
 # Don't include data
