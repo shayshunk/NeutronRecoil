@@ -133,7 +133,7 @@ def main():
 
         NAME = "{0:.2f}_MeV".format(kinetic_energy)
 
-        for iteration in tqdm(range(iterations)):
+        for iteration in tqdm(range(iterations), desc="Generating recoils: ", colour='green'):
             kinetic_energy_random = random.uniform(0.0, kinetic_energy)
             E_n = neutron_mass + kinetic_energy_random
             p_n = sqrt(E_n**2 - neutron_mass**2)

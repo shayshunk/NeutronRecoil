@@ -37,6 +37,7 @@ else:
     fileName = "Continuous-5-dense-512-nodes-200-batch-NoSmear.keras"
 
 recoilModel = tf.keras.models.load_model(path + fileName)
+print("Loading", path+fileName)
 
 # Reading in truth and reconstructed data
 path = r'/home/shashank/Documents/Projects/NeutronRecoil/Data/Discrete/' + \
@@ -48,6 +49,7 @@ else:
     fileName = "DiscreteTesting-NoSmear_*.pkl"
 
 datasets = glob.glob(os.path.join(path, fileName))
+print("Loading", path+fileName)
 
 recoilDatasets = []
 testingEnergies = []

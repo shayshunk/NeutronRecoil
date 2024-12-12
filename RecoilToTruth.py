@@ -50,6 +50,7 @@ del li
 # Scrambling database
 recoilData = recoilData.sample(frac=1).reset_index(drop=True)
 print(recoilData.head(20))
+print(len(recoilData), "total events")
 
 # Splitting data into training and testing labels, saving 25% for testing
 trainingData = recoilData.iloc[:14000000, :]
@@ -87,6 +88,8 @@ for denseLayer in denseLayers:
 
             NAME = "Continuous-{}-dense-{}-nodes-{}-batch-{}".format(
                 denseLayer, layerSize, batchSize, int(time.time()))
+            if (smearing == False):
+                NAME = NAME + "-NoSmear"
             print("Model:")
             print(NAME)
             tensorboard = TensorBoard(
@@ -113,8 +116,9 @@ for denseLayer in denseLayers:
                 protonTesting, neutronTesting), epochs=10, callbacks=[tensorboard])
 
             # Saving model
-            RecoilModel.save(
-                "Networks/Continuous/40_Recoils/{}.keras".format(NAME))
+            path = r'/home/shashank/Documents/Projects/NeutronRecoil/Networks/Continuous/' + \
+                recoils + '_Recoils/'
+            RecoilModel.save(path + "{}.keras".format(NAME))
 
             # Predicting Phi
             modelPrediction = RecoilModel.predict(plottingProtons)
@@ -144,7 +148,10 @@ for denseLayer in denseLayers:
             plt.xlim(0, 5.5)
             plt.ylabel("Predicted Energy (MeV)")
             plt.ylim(0, 5.5)
-            plt.savefig(
-                "Plots/Continuous/40_Recoils/True Energy Continuous_{}.png".format(NAME), bbox_inches='tight')
+
+            path = r'/home/shashank/Documents/Projects/NeutronRecoil/Plots/Continuous/' + \
+                recoils + '_Recoils/'
+            plt.savefig(path + "True Energy Continuous_{}.png".format(
+                NAME), bbox_inches='tight')
 
             counter = counter+1
