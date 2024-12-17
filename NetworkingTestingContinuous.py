@@ -34,9 +34,12 @@ path = r'/home/shashank/Documents/Projects/NeutronRecoil/Networks/Continuous/' +
 if (smearing):
     fileName = "Continuous-5-dense-512-nodes-200-batch.keras"
 else:
-    fileName = "Continuous-5-dense-512-nodes-200-batch-NoSmear.keras"
+    fileName = "Continuous-5-dense-512-nodes-200-batch-NoSmear_5mil.keras"
+
+fileName2 = "Continuous-5-dense-512-nodes-200-batch-NoSmear_10mil.keras"
 
 recoilModel = tf.keras.models.load_model(path + fileName)
+recoilModel2 = tf.keras.models.load_model(path + fileName2)
 print("Loading", path+fileName)
 
 # Reading in truth and reconstructed data
@@ -76,22 +79,33 @@ networkBiasFractional = []
 networkSigma = []
 networkSigmaFractional = []
 
+networkBias2 = []
+networkBiasFractional2 = []
+networkSigma2 = []
+networkSigmaFractional2 = []
+
 path = r'/home/shashank/Documents/Projects/NeutronRecoil/Plots/Continuous/' + \
     recoils + '_Recoils/'
 
 for energy, recoilData in zip(testingEnergies, recoilDatasets):
 
     model = recoilModel
+    model2 = recoilModel2
 
     prediction = model.predict(recoilData)
     prediction = prediction * 5
+
+    prediction2 = model2.predict(recoilData)
+    prediction2 = prediction2 * 5
 
     plt.figure(1)
     fig, ax = plt.subplots()
 
     hist, binning, _ = plt.hist(prediction, bins=bin)
+    hist2, binning2, _ = plt.hist(prediction2, bins=bin)
     # Calculate the bin centers
     bin_centers = 0.5 * (binning[1:] + binning[:-1])
+    bin_centers2 = 0.5 * (binning2[1:] + binning2[:-1])
 
     xmin, xmax = plt.xlim()
 
@@ -100,7 +114,8 @@ for energy, recoilData in zip(testingEnergies, recoilDatasets):
     # Fit the Gaussian curve to the histogram
     popt, pcov = curve_fit(
         fit_func, binning[:-1], hist, p0=[1, np.mean(prediction), np.std(prediction)], maxfev=100000)
-    print("Fit parameters:", popt)
+    popt2, pcov2 = curve_fit(
+        fit_func, binning2[:-1], hist2, p0=[1, np.mean(prediction), np.std(prediction)], maxfev=100000)
 
     # Plot the fitted curve
     plt.plot(binning, fit_func(binning, *popt),
@@ -127,71 +142,86 @@ for energy, recoilData in zip(testingEnergies, recoilDatasets):
 
     mean = popt[1]
     std = popt[2]
+    mean2 = popt2[1]
+    std2 = popt2[2]
 
     networkBias.append(mean - energy)
     networkSigma.append(std)
     networkBiasFractional.append((mean - energy) / energy)
     networkSigmaFractional.append(std / energy)
 
+    networkBias2.append(mean2 - energy)
+    networkSigma2.append(std2)
+    networkBiasFractional2.append((mean2 - energy) / energy)
+    networkSigmaFractional2.append(std2 / energy)
+
 
 plt.figure(3)
 fig, ax = plt.subplots()
 
-plt.scatter(testingEnergies, networkBias)
+plt.scatter(testingEnergies, networkBias, label="5 million")
+plt.scatter(testingEnergies, networkBias2, label="10 million")
 plt.title("Bias vs Energy")
 plt.xlabel("True Energy (MeV)")
 plt.ylabel("Network Bias (MeV)")
+plt.legend()
 
 if (smearing):
     fileName = "Network Biases.png"
     print(smearing)
 else:
-    fileName = "Network Biases-NoSmear.png"
+    fileName = "Network Biases-NoSmear2.png"
 
 plt.savefig(path + fileName, bbox_inches='tight')
 
 plt.figure(4)
 fig, ax = plt.subplots()
 
-plt.scatter(testingEnergies, networkSigma)
+plt.scatter(testingEnergies, networkSigma, label="5 million")
+plt.scatter(testingEnergies, networkSigma2, label="10 million")
 plt.title("Uncertainty vs Energy")
 plt.xlabel("True Energy (MeV)")
 plt.ylabel("Network Uncertainty (MeV)")
+plt.legend()
 
 if (smearing):
     fileName = "Network Sigmas.png"
 else:
-    fileName = "Network Sigmas-NoSmear.png"
+    fileName = "Network Sigmas-NoSmear2.png"
 plt.savefig(path + fileName, bbox_inches='tight')
 
 plt.figure(5)
 fig, ax = plt.subplots()
 
-plt.scatter(testingEnergies, networkBiasFractional)
+plt.scatter(testingEnergies, networkBiasFractional, label="5 million")
+plt.scatter(testingEnergies, networkBiasFractional2, label="10 million")
 plt.ylim(-0.05, 0.05)
 plt.title("Bias vs Energy")
 plt.xlabel("True Energy (MeV)")
 plt.ylabel("Network Bias / Energy")
+plt.legend()
 
 if (smearing):
     fileName = "Network Biases Fractional.png"
     print(smearing)
 else:
-    fileName = "Network Biases Fractional-NoSmear.png"
+    fileName = "Network Biases Fractional-NoSmear2.png"
 
 plt.savefig(path + fileName, bbox_inches='tight')
 
 plt.figure(6)
 fig, ax = plt.subplots()
 
-plt.scatter(testingEnergies, networkSigmaFractional)
+plt.scatter(testingEnergies, networkSigmaFractional, label="5 million")
+plt.scatter(testingEnergies, networkSigmaFractional2, label="10 million")
 plt.ylim(-0.05, 0.05)
 plt.title("Uncertainty vs Energy")
 plt.xlabel("True Energy (MeV)")
 plt.ylabel("Network Uncertainty / Energy")
+plt.legend()
 
 if (smearing):
     fileName = "Network Sigmas Fractional.png"
 else:
-    fileName = "Network Sigmas Fractional-NoSmear.png"
+    fileName = "Network Sigmas Fractional-NoSmear2.png"
 plt.savefig(path + fileName, bbox_inches='tight')

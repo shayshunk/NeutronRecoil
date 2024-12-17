@@ -7,6 +7,7 @@ from tensorflow.keras.callbacks import TensorBoard  # type: ignore
 import time
 import glob
 import os
+import gc
 
 gpus = tf.config.list_physical_devices('GPU')
 if gpus:
@@ -43,6 +44,7 @@ for filename in files:
     df = pd.read_pickle(filename)
     li.append(df)
     del df
+    gc.collect()
 
 recoilData = pd.concat(li)
 del li
@@ -53,8 +55,8 @@ print(recoilData.head(20))
 print(len(recoilData), "total events")
 
 # Splitting data into training and testing labels, saving 25% for testing
-trainingData = recoilData.iloc[:14000000, :]
-testingData = recoilData.iloc[14000000:, :]
+trainingData = recoilData.iloc[:8000000, :]
+testingData = recoilData.iloc[8000000:, :]
 
 # Extracting proton data vs neutron data
 neutronTraining = trainingData.iloc[:, dataPoints]
@@ -118,7 +120,7 @@ for denseLayer in denseLayers:
             # Saving model
             path = r'/home/shashank/Documents/Projects/NeutronRecoil/Networks/Continuous/' + \
                 recoils + '_Recoils/'
-            RecoilModel.save(path + "{}.keras".format(NAME))
+            RecoilModel.save(path + "{}_10mil.keras".format(NAME))
 
             # Predicting Phi
             modelPrediction = RecoilModel.predict(plottingProtons)
